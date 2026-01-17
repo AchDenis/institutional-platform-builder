@@ -2,19 +2,21 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Clock, User, Award } from "lucide-react";
-import { currentStudent, getStudentCourses, teachers, staff } from "@/data/mockData";
+import { currentStudent, getStudentCourses, getCourseTeacher } from "@/data/mockData";
 
 const Courses = () => {
   const studentCourses = getStudentCourses(currentStudent.id);
 
-  // Assign mock teachers to courses
-  const coursesWithTeachers = studentCourses.map((course, index) => ({
-    ...course,
-    teacher: teachers[index % teachers.length],
-    teacherTitle: staff[index % staff.length]?.title || "",
-    schedule: ["Luni 10:00-12:00", "Marți 14:00-16:00", "Miercuri 08:00-10:00", "Joi 12:00-14:00", "Vineri 10:00-12:00", "Luni 14:00-16:00"][index],
-    room: ["C2", "A305", "B102", "C1", "A201", "B303"][index],
-  }));
+  // Get teachers for courses from the database
+  const coursesWithTeachers = studentCourses.map((course, index) => {
+    const teacher = getCourseTeacher(course.id ?? 0);
+    return {
+      ...course,
+      teacher: teacher,
+      schedule: ["Luni 10:00-12:00", "Marți 14:00-16:00", "Miercuri 08:00-10:00", "Joi 12:00-14:00", "Vineri 10:00-12:00", "Luni 14:00-16:00"][index],
+      room: ["C2", "A305", "B102", "C1", "A201", "B303"][index],
+    };
+  });
 
   return (
     <DashboardLayout>
@@ -45,14 +47,16 @@ const Courses = () => {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center gap-3 text-sm">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <User className="w-4 h-4" />
-                  <span>
-                    {course.teacherTitle} {course.teacher.firstName} {course.teacher.lastName}
-                  </span>
+              {course.teacher && (
+                <div className="flex items-center gap-3 text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <User className="w-4 h-4" />
+                    <span>
+                      {course.teacher.title} {course.teacher.firstName} {course.teacher.lastName}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
               
               <div className="flex items-center gap-3 text-sm">
                 <div className="flex items-center gap-2 text-muted-foreground">
